@@ -2,7 +2,7 @@ Screens:
   ScrCPRRiskAnalysis:
     Properties:
       LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
-      OnVisible: "=Set(varLoading,true);\r\n////////Need to Update after integration\r\nSet(varRiskAnalysisStatus,\"Started\");\r\n\r\nSet(varRiskSummaryShowAttachmentPopup, false);\r\nSet(varSelectedSummaryRisk, Blank());\r\n//Set(varRAEngagementNo,\"20270099\");\r\nSet(varSelectedContainer,\"Risk Analysis\");\r\n////\r\nSet(varSectionName, \"Past Audit Report\");\r\nSet(PreviousAuditExpand,true);\r\n\r\nSet(varQuickLinksVisible,false);\r\nSet(varFirstFileUpload, false);\r\nSet(varSecondFileUpload, false);\r\nSet(varThirdFileUpload, false);\r\nSet(varFirstFileUploadControl, false);\r\nSet(varSecondFileUploadControl, false);\r\nSet(varThirdFileUploadControl, false);\r\nUpdateContext({locDisplayELMailPopUp: false});\r\nSet(varSelectedSectionID,1);\r\nUpdateContext({locDisplayEditPopUp: false});\r\nUpdateContext({locDisplayEditPopUpScope: false});\r\nUpdateContext({locDisplayAddPopUp: false});\r\nUpdateContext({locDisplayAddPopUpScope: false});\r\nUpdateContext({locDisplayDeletePopUp: false});\r\nUpdateContext({locDisplayELMailPopUp: false});\r\nUpdateContext({varIDRDeleteChangeLog: false});\r\nUpdateContext({locDisplayUpgradeRiskPopUp: false});\r\nClearCollect(\r\n    colSectionIDs,\r\n    {\r\n        SectionID: 1,\r\n        SectionName: \"Past Audit Report\"\r\n    },\r\n    {\r\n        SectionID: 2,\r\n        SectionName: \"SI History\"\r\n    },\r\n    {\r\n        SectionID: 3,\r\n        SectionName: \"Inputs from Legal\"\r\n    },\r\n    {\r\n        SectionID: 7,\r\n        SectionName: \"Additional Inputs\"\r\n    },\r\n    {\r\n        SectionID: 6,\r\n        SectionName: \"AI Scope\"\r\n    },\r\n    {\r\n        SectionID: 5,\r\n        SectionName: \"AI Risk Types\"\r\n    },\r\n    {\r\n        SectionID: 4,\r\n        SectionName: \"AI Observations\"\r\n    }\r\n   \r\n);\r\nSet(varSelectMode,false);\r\n//Select(Button5_8);\r\nIf(\r\n    First(colFilteredEngagementAudit).IDRStatus = \"Draft Complete\" || First(colFilteredEngagementAudit).IDRStatus = \"Response In-Progress\" || First(colFilteredEngagementAudit).IDRStatus = \"Submitted\" || First(colFilteredEngagementAudit).IDRStatus = \"Complete\",\r\n    UpdateContext({varIsFinal: true});\r\n    ,\r\n    UpdateContext({varIsFinal: false});\r\n    \r\n);\r\nSet(\r\n    varAuditPlanRecord,\r\n    LookUp(\r\n        CPR_Audit_Plans,\r\n        engagement_number = First(colFilteredEngagementAudit).EngagementNumber\r\n    )\r\n);\r\nSet(\r\n    varCanManageIDR,\r\n    !IsBlank(varAuditPlanRecord) && (CountRows(\r\n        Filter(\r\n            TrimEnds(\r\n                Split(\r\n                    Coalesce(\r\n                        varAuditPlanRecord.CAI_team_coordinator_email,\r\n                        \"\"\r\n                    ),\r\n                    \",\"\r\n                )\r\n            ),\r\n            Lower(Value) = Lower(User().Email)\r\n        )\r\n    ) > 0 || CountRows(\r\n        Filter(\r\n            TrimEnds(\r\n                Split(\r\n                    Coalesce(\r\n                        varAuditPlanRecord.IDR_task_auditor,\r\n                        \"\"\r\n                    ),\r\n                    \",\"\r\n                )\r\n            ),\r\n            Lower(Value) = Lower(User().Email)\r\n        )\r\n    ) > 0)\r\n);\r\nSet(varBulkUnLockSel, false);\r\n\r\nSet(varBulkSel, false);\r\n\r\nSet(varSelectedEngagementNo,First(colFilteredEngagementAudit).EngagementNumber);\r\nSet(varIDRStatus,First(colFilteredEngagementAudit).IDRStatus);\r\nClearCollect(colELPDFVersions,Filter('Engagement Letter',EngagementNumber = First(colFilteredEngagementAudit).EngagementNumber));\r\nSet(varLoading,false);\r\n\r\nClearCollect(\r\n    colWeGotResponse,\r\n    Filter(\r\n        Respondents,\r\n        Engagement_No = varSelectedEngagementNo\r\n    )\r\n);\r\n\r\n\r\nSet(\r\n    varScopingDeckExpanded,\r\n    false\r\n);\r\nSet(\r\n    varScopingDeckDownloading,\r\n    false\r\n);\r\nSet(\r\n    varScopingDeckDownloadUrl,\r\n    \"\"\r\n);\r\nSet(\r\n    varShowScopingDeckUploadPopup,\r\n    false\r\n);\r\nSet(\r\n    varScopingDeckTracker,\r\n    Blank()\r\n);\r\nSet(\r\n    varScopingDeckFileRecord,\r\n    Blank()\r\n);\r\nSet(\r\n    varScopingDeckGenerating,\r\n    false\r\n);\r\nSet(\r\n    varScopingDeckPercentage,\r\n    0\r\n);\r\nSet(\r\n    varScopingDeckStage,\r\n    Blank()\r\n);\r\nSet(\r\n    varScopingDeckReady,\r\n    false\r\n);\r\nRefresh(CPR_tb_RA_AIProcessTrackers);\r\nRefresh(CPR_tb_ScopingDeckAIS);\r\nSet(\r\n    varScopingDeckTracker,\r\n    LookUp(\r\n        CPR_tb_RA_AIProcessTrackers,\r\n        EngagementNo = varRAEngagementNo\r\n    )\r\n);\r\nSet(\r\n    varScopingDeckFileRecord,\r\n    LookUp(\r\n        CPR_tb_ScopingDeckAIS,\r\n        EngagementNo = Text(varRAEngagementNo)\r\n    )\r\n);\r\nIf(\r\n    !IsBlank(varScopingDeckTracker),\r\n    Set(\r\n        varScopingDeckStage,\r\n        Coalesce(\r\n            varScopingDeckTracker.AIScopingDeckStage,\r\n            Blank()\r\n        )\r\n    );\r\n    Set(\r\n        varScopingDeckPercentage,\r\n        Coalesce(\r\n            varScopingDeckTracker.PercentageCompletionForAIScopingDeck,\r\n            0\r\n        )\r\n    )\r\n);\r\nSet(\r\n    varScopingDeckReady,\r\n    !IsBlank(varScopingDeckFileRecord) && (Lower(\r\n        Trim(\r\n            Coalesce(\r\n                varScopingDeckStage,\r\n                \"\"\r\n            )\r\n        )\r\n    ) = \"finalizing deck\" || varScopingDeckPercentage >= 100)\r\n);\r\nSet(\r\n    varScopingDeckGenerating,\r\n    !varScopingDeckReady && !IsBlank(varScopingDeckTracker) && (varScopingDeckPercentage > 0 || Lower(\r\n        Trim(\r\n            Coalesce(\r\n                varScopingDeckStage,\r\n                \"\"\r\n            )\r\n        )\r\n    ) in [\r\n        \"starting\",\r\n        \"generating\",\r\n        \"generating deck\",\r\n        \"creating deck\",\r\n        \"finalizing deck\"\r\n    ])\r\n);\r\nSet(\r\n    varScopingDeckHumanUpdated,\r\n    !IsBlank(varScopingDeckFileRecord) && Coalesce(\r\n        varScopingDeckFileRecord.isHumanGenerated,\r\n        false\r\n    )\r\n);\r\n\r\nSet(varSelectedSectionID2, 1);\r\nSet(varSectionName2, \"Questions & Responses\");\r\n//Set(varSelectedS, 1);\r\n\r\nClearCollect(\r\ncolAllRiskAnalyses,\r\nSort(\r\nFilter(\r\nCPR_tb_Risk_Analyses,\r\nEngagementNo = varRAEngagementNo &&\r\nSectionNo = \"5\"\r\n),\r\nRiskNo,\r\nSortOrder.Ascending\r\n)\r\n);\r\nSet(varRiskPageNumber, 1);\r\nSet(varRiskPageSize, 10);\r\n\r\nClearCollect(\r\n    colRiskAnalysesWithSerialNo,\r\n    AddColumns(\r\n        SortByColumns(\r\n            CPR_tb_Risk_Analyses,\r\n            \"jnj_riskno\",\r\n            SortOrder.Ascending\r\n        ),\r\n        SerialNo,\r\n        0\r\n    )\r\n)\r\n"
+      OnVisible: "=Set(varLoading,true);\r\n////////Need to Update after integration\r\nSet(varRiskAnalysisStatus,\"Started\");\r\nSet(varNewScope,1);\r\n\r\nSet(varRiskSummaryShowAttachmentPopup, false);\r\nSet(varSelectedSummaryRisk, Blank());\r\n//Set(varRAEngagementNo,\"20270099\");\r\nSet(varSelectedContainer,\"Risk Analysis\");\r\n////\r\nSet(varSectionName, \"Past Audit Report\");\r\nSet(PreviousAuditExpand,true);\r\n\r\nSet(varQuickLinksVisible,false);\r\nSet(varFirstFileUpload, false);\r\nSet(varSecondFileUpload, false);\r\nSet(varThirdFileUpload, false);\r\nSet(varFirstFileUploadControl, false);\r\nSet(varSecondFileUploadControl, false);\r\nSet(varThirdFileUploadControl, false);\r\nUpdateContext({locDisplayELMailPopUp: false});\r\nSet(varSelectedSectionID,1);\r\nUpdateContext({locDisplayEditPopUp: false});\r\nUpdateContext({locDisplayEditPopUpScope: false});\r\nUpdateContext({locDisplayAddPopUp: false});\r\nUpdateContext({locDisplayAddPopUpScope: false});\r\nUpdateContext({locDisplayDeletePopUp: false});\r\nUpdateContext({locDisplayELMailPopUp: false});\r\nUpdateContext({varIDRDeleteChangeLog: false});\r\nUpdateContext({locDisplayUpgradeRiskPopUp: false});\r\nClearCollect(\r\n    colSectionIDs,\r\n    {\r\n        SectionID: 1,\r\n        SectionName: \"Past Audit Report\"\r\n    },\r\n    {\r\n        SectionID: 2,\r\n        SectionName: \"SI History\"\r\n    },\r\n    {\r\n        SectionID: 3,\r\n        SectionName: \"Inputs from Legal\"\r\n    },\r\n    {\r\n        SectionID: 7,\r\n        SectionName: \"Additional Inputs\"\r\n    },\r\n    {\r\n        SectionID: 6,\r\n        SectionName: \"AI Scope\"\r\n    },\r\n    {\r\n        SectionID: 5,\r\n        SectionName: \"AI Risk Types\"\r\n    },\r\n    {\r\n        SectionID: 4,\r\n        SectionName: \"AI Observations\"\r\n    }\r\n   \r\n);\r\nSet(varSelectMode,false);\r\n//Select(Button5_8);\r\nIf(\r\n    First(colFilteredEngagementAudit).IDRStatus = \"Draft Complete\" || First(colFilteredEngagementAudit).IDRStatus = \"Response In-Progress\" || First(colFilteredEngagementAudit).IDRStatus = \"Submitted\" || First(colFilteredEngagementAudit).IDRStatus = \"Complete\",\r\n    UpdateContext({varIsFinal: true});\r\n    ,\r\n    UpdateContext({varIsFinal: false});\r\n    \r\n);\r\nSet(\r\n    varAuditPlanRecord,\r\n    LookUp(\r\n        CPR_Audit_Plans,\r\n        engagement_number = First(colFilteredEngagementAudit).EngagementNumber\r\n    )\r\n);\r\nSet(\r\n    varCanManageIDR,\r\n    !IsBlank(varAuditPlanRecord) && (CountRows(\r\n        Filter(\r\n            TrimEnds(\r\n                Split(\r\n                    Coalesce(\r\n                        varAuditPlanRecord.CAI_team_coordinator_email,\r\n                        \"\"\r\n                    ),\r\n                    \",\"\r\n                )\r\n            ),\r\n            Lower(Value) = Lower(User().Email)\r\n        )\r\n    ) > 0 || CountRows(\r\n        Filter(\r\n            TrimEnds(\r\n                Split(\r\n                    Coalesce(\r\n                        varAuditPlanRecord.IDR_task_auditor,\r\n                        \"\"\r\n                    ),\r\n                    \",\"\r\n                )\r\n            ),\r\n            Lower(Value) = Lower(User().Email)\r\n        )\r\n    ) > 0)\r\n);\r\nSet(varBulkUnLockSel, false);\r\n\r\nSet(varBulkSel, false);\r\n\r\nSet(varSelectedEngagementNo,First(colFilteredEngagementAudit).EngagementNumber);\r\nSet(varIDRStatus,First(colFilteredEngagementAudit).IDRStatus);\r\nClearCollect(colELPDFVersions,Filter('Engagement Letter',EngagementNumber = First(colFilteredEngagementAudit).EngagementNumber));\r\nSet(varLoading,false);\r\n\r\nClearCollect(\r\n    colWeGotResponse,\r\n    Filter(\r\n        Respondents,\r\n        Engagement_No = varSelectedEngagementNo\r\n    )\r\n);\r\n\r\n\r\nSet(\r\n    varScopingDeckExpanded,\r\n    false\r\n);\r\nSet(\r\n    varScopingDeckDownloading,\r\n    false\r\n);\r\nSet(\r\n    varScopingDeckDownloadUrl,\r\n    \"\"\r\n);\r\nSet(\r\n    varShowScopingDeckUploadPopup,\r\n    false\r\n);\r\nSet(\r\n    varScopingDeckTracker,\r\n    Blank()\r\n);\r\nSet(\r\n    varScopingDeckFileRecord,\r\n    Blank()\r\n);\r\nSet(\r\n    varScopingDeckGenerating,\r\n    false\r\n);\r\nSet(\r\n    varScopingDeckPercentage,\r\n    0\r\n);\r\nSet(\r\n    varScopingDeckStage,\r\n    Blank()\r\n);\r\nSet(\r\n    varScopingDeckReady,\r\n    false\r\n);\r\nRefresh(CPR_tb_RA_AIProcessTrackers);\r\nRefresh(CPR_tb_ScopingDeckAIS);\r\nSet(\r\n    varScopingDeckTracker,\r\n    LookUp(\r\n        CPR_tb_RA_AIProcessTrackers,\r\n        EngagementNo = varRAEngagementNo\r\n    )\r\n);\r\nSet(\r\n    varScopingDeckFileRecord,\r\n    LookUp(\r\n        CPR_tb_ScopingDeckAIS,\r\n        EngagementNo = Text(varRAEngagementNo)\r\n    )\r\n);\r\nIf(\r\n    !IsBlank(varScopingDeckTracker),\r\n    Set(\r\n        varScopingDeckStage,\r\n        Coalesce(\r\n            varScopingDeckTracker.AIScopingDeckStage,\r\n            Blank()\r\n        )\r\n    );\r\n    Set(\r\n        varScopingDeckPercentage,\r\n        Coalesce(\r\n            varScopingDeckTracker.PercentageCompletionForAIScopingDeck,\r\n            0\r\n        )\r\n    )\r\n);\r\nSet(\r\n    varScopingDeckReady,\r\n    !IsBlank(varScopingDeckFileRecord) && (Lower(\r\n        Trim(\r\n            Coalesce(\r\n                varScopingDeckStage,\r\n                \"\"\r\n            )\r\n        )\r\n    ) = \"finalizing deck\" || varScopingDeckPercentage >= 100)\r\n);\r\nSet(\r\n    varScopingDeckGenerating,\r\n    !varScopingDeckReady && !IsBlank(varScopingDeckTracker) && (varScopingDeckPercentage > 0 || Lower(\r\n        Trim(\r\n            Coalesce(\r\n                varScopingDeckStage,\r\n                \"\"\r\n            )\r\n        )\r\n    ) in [\r\n        \"starting\",\r\n        \"generating\",\r\n        \"generating deck\",\r\n        \"creating deck\",\r\n        \"finalizing deck\"\r\n    ])\r\n);\r\nSet(\r\n    varScopingDeckHumanUpdated,\r\n    !IsBlank(varScopingDeckFileRecord) && Coalesce(\r\n        varScopingDeckFileRecord.isHumanGenerated,\r\n        false\r\n    )\r\n);\r\n\r\nSet(varSelectedSectionID2, 1);\r\nSet(varSectionName2, \"Questions & Responses\");\r\n//Set(varSelectedS, 1);\r\n\r\nClearCollect(\r\ncolAllRiskAnalyses,\r\nSort(\r\nFilter(\r\nCPR_tb_Risk_Analyses,\r\nEngagementNo = varRAEngagementNo &&\r\nSectionNo = \"5\"\r\n),\r\nRiskNo,\r\nSortOrder.Ascending\r\n)\r\n);\r\nSet(varRiskPageNumber, 1);\r\nSet(varRiskPageSize, 10);\r\n\r\nClearCollect(\r\n    colRiskAnalysesWithSerialNo,\r\n    AddColumns(\r\n        SortByColumns(\r\n            CPR_tb_Risk_Analyses,\r\n            \"jnj_riskno\",\r\n            SortOrder.Ascending\r\n        ),\r\n        SerialNo,\r\n        0\r\n    )\r\n)\r\n"
     Children:
       - Canvas1_8:
           Control: FluidGrid@2.3.0
@@ -13818,46 +13818,24 @@ Screens:
                                                                                     HoverFill: =ColorValue("#EB1700")
                                                                                     OnSelect: |-
                                                                                       =Set(varLoading,true);
-
-                                                                                      Set(
-                                                                                          varSelectedScopeRecord,
-                                                                                          ThisItem
-                                                                                      );
-
-                                                                                      Set(
-                                                                                          varSelectedRiskNo,
-                                                                                          ThisItem.ScopeNo
-                                                                                      );
-
-                                                                                      Set(
-                                                                                          varOldScopeSampleSize,
-                                                                                          ThisItem.'Proposed Sample Size'
-                                                                                      );
-
-                                                                                      Set(
-                                                                                          varOldScopeSummary,
-                                                                                          ThisItem.'Summary of Risks'
-                                                                                      );
-
-                                                                                      Set(
-                                                                                          varOldIncludedInScope,
-                                                                                          ThisItem.IncludedInScope
-                                                                                      );
-
+                                                                                      Set(varScopeKey, Text(ThisItem.' CPR_tb_Scope'));
+                                                                                      Set(varScopeSerial, ThisItem.SerialNo);
+                                                                                      Set(varOldScopeRecord, ThisItem);
+                                                                                      Set(varSelectedScopeRecord, ThisItem);
+                                                                                      Set(varSelectedRiskNo, ThisItem.ScopeNo);
+                                                                                      Set(varOldScopeSampleSize, ThisItem.'Proposed Sample Size');
+                                                                                      Set(varOldScopeSummary, ThisItem.'Summary of Risks');
+                                                                                      Set(varOldIncludedInScope, ThisItem.IncludedInScope);
                                                                                       ClearCollect(
                                                                                           colOldScopeAttachments,
-                                                                                          ForAll(
-                                                                                              ThisItem.Attachments As OldAttachment,
-                                                                                              {
-                                                                                                  FileName: OldAttachment.DisplayName
-                                                                                              }
-                                                                                          )
+                                                                                          ForAll(ThisItem.Attachments As OldAttachment, {FileName: OldAttachment.DisplayName})
                                                                                       );
-
+                                                                                      ClearCollect(colNewScopeAttachments, {FileName: ""});
+                                                                                      Clear(colNewScopeAttachments);
+                                                                                      Set(varNewScopeRec, Blank());
                                                                                       Set(varAddNewRisk, false);
                                                                                       Set(varEditRisk, true);
                                                                                       UpdateContext({locDisplayEditPopUpScope: true});
-                                                                                      Set(varSelectedRiskNo, ThisItem.ScopeNo);
                                                                                       Set(varLoading,false);
                                                                                     PaddingBottom: =0
                                                                                     PaddingLeft: =0
@@ -13992,159 +13970,78 @@ Screens:
                                                                                     HoverColor: =RGBA(0, 0, 0, 1)
                                                                                     HoverFill: =RGBA(255, 255, 255, 1)
                                                                                     OnSelect: |-
-                                                                                      =Set(
-                                                                                          varLogScopeNo,
-                                                                                          Text(ThisItem.ScopeNo)
-                                                                                      );
-
-                                                                                      Set(
-                                                                                          varLogEngagementNo,
-                                                                                          Text(varSelectedEngagementNo)
-                                                                                      );
-
-                                                                                      Set(
-                                                                                          varChangeLogRiskID,
-                                                                                          Text(ThisItem.ScopeNo)
-                                                                                      );
-
-                                                                                      /* Get Scope-specific Change Log records */
+                                                                                      =Set(varScopeKey, Text(ThisItem.' CPR_tb_Scope'));
+                                                                                      Set(varScopeSerial, ThisItem.SerialNo);
+                                                                                      Set(varLogScopeNo, Text(ThisItem.ScopeNo));
+                                                                                      Set(varLogEngagementNo, Text(varSelectedEngagementNo));
+                                                                                      Set(varChangeLogRiskID, Text(ThisItem.SerialNo));
                                                                                       Refresh(CPR_RiskAnalysis_ChangeLogs);
-
                                                                                       ClearCollect(
                                                                                           colScopeChangeLogs,
                                                                                           Filter(
                                                                                               CPR_RiskAnalysis_ChangeLogs,
-                                                                                              engagement_number = varLogEngagementNo &&
-                                                                                              EntityID = varLogScopeNo &&
-                                                                                              SectionID = "5" &&
-                                                                                              EntityType = "Scope"
+                                                                                              EntityType = "Scope" &&
+                                                                                              (
+                                                                                                  EntityID = varScopeKey ||
+                                                                                                  (
+                                                                                                      !IsBlank(ThisItem.ScopeNo) &&
+                                                                                                      EntityID = Text(ThisItem.ScopeNo) &&
+                                                                                                      (engagement_number = Text(varRAEngagementNo) || engagement_number = Text(varSelectedEngagementNo))
+                                                                                                  )
+                                                                                              )
                                                                                           )
                                                                                       );
-
-                                                                                      /* Build cards shown in existing Change Log popup */
                                                                                       Clear(colAddNewLogCard);
-
-                                                                                      /* ==============================
-                                                                                         ADD NEW / SYSTEM GENERATED SCOPE
-                                                                                         ============================== */
-
                                                                                       Collect(
                                                                                           colAddNewLogCard,
                                                                                           {
-                                                                                              QuestionTitle:
-                                                                                                  "Scope ID: " & varLogScopeNo,
-
-                                                                                              SectionLabel:
-                                                                                                  "Add New",
-
-                                                                                              TypeOfChangeText:
-                                                                                                  "System or user adds a new scope in AI Scope",
-
-                                                                                              DetailsText:
-                                                                                                  "",
-
+                                                                                              QuestionTitle: "Scope ID: " & Text(varScopeSerial),
+                                                                                              SectionLabel: "Add New",
+                                                                                              TypeOfChangeText: "System or user adds a new scope in AI Scope",
+                                                                                              DetailsText: "",
                                                                                               ActionByDisplay:
                                                                                                   Coalesce(
-                                                                                                      LookUp(
-                                                                                                          colScopeChangeLogs,
-                                                                                                          ActionCode = "ADD_SCOPE" &&
-                                                                                                          Field = "Added By",
-                                                                                                          DisplayDetails
-                                                                                                      ),
+                                                                                                      LookUp(colScopeChangeLogs, ActionCode = "ADD_SCOPE" && Field = "Added By", DisplayDetails),
                                                                                                       "System"
                                                                                                   ),
-
                                                                                               ActionDateDisplay:
                                                                                                   Coalesce(
-                                                                                                      LookUp(
-                                                                                                          colScopeChangeLogs,
-                                                                                                          ActionCode = "ADD_SCOPE" &&
-                                                                                                          Field = "Date Added",
-                                                                                                          DisplayDetails
-                                                                                                      ),
-                                                                                                      Text(
-                                                                                                          ThisItem.'Created On',
-                                                                                                          "[$-en-US]mmmm d, yyyy ""at"" h:mm:ss AM/PM"
-                                                                                                      )
+                                                                                                      LookUp(colScopeChangeLogs, ActionCode = "ADD_SCOPE" && Field = "Date Added", DisplayDetails),
+                                                                                                      Text(ThisItem.'Created On', "[$-en-US]mmmm d, yyyy ""at"" h:mm:ss AM/PM")
                                                                                                   )
                                                                                           }
                                                                                       );
-
-                                                                                      /* ==============================
-                                                                                         EDIT HISTORY
-                                                                                         ============================== */
-
                                                                                       ForAll(
-                                                                                          Distinct(
-                                                                                              Filter(
-                                                                                                  colScopeChangeLogs,
-                                                                                                  ActionCode = "EDIT_SCOPE"
-                                                                                              ),
-                                                                                              LogGroupID
-                                                                                          ) As grp,
-
+                                                                                          Distinct(Filter(colScopeChangeLogs, ActionCode = "EDIT_SCOPE"), LogGroupID) As grp,
                                                                                           Collect(
                                                                                               colAddNewLogCard,
                                                                                               {
-                                                                                                  QuestionTitle:
-                                                                                                      "Scope ID: " & varLogScopeNo,
-
-                                                                                                  SectionLabel:
-                                                                                                      "Edit",
-
-                                                                                                  TypeOfChangeText:
-                                                                                                      "Scope updated",
-
+                                                                                                  QuestionTitle: "Scope ID: " & Text(varScopeSerial),
+                                                                                                  SectionLabel: "Edit",
+                                                                                                  TypeOfChangeText: "Scope updated",
                                                                                                   DetailsText:
                                                                                                       Concat(
-                                                                                                          Filter(
-                                                                                                              colScopeChangeLogs,
-                                                                                                              LogGroupID = grp.Value &&
-                                                                                                              Field = "Change Details"
-                                                                                                          ),
+                                                                                                          Filter(colScopeChangeLogs, LogGroupID = grp.Value && Field = "Change Details"),
                                                                                                           DisplayDetails,
                                                                                                           Char(10)
                                                                                                       ),
-
                                                                                                   ActionByDisplay:
-                                                                                                      LookUp(
-                                                                                                          colScopeChangeLogs,
-                                                                                                          LogGroupID = grp.Value &&
-                                                                                                          Field = "Updated By",
-                                                                                                          DisplayDetails
-                                                                                                      ),
-
+                                                                                                      LookUp(colScopeChangeLogs, LogGroupID = grp.Value && Field = "Updated By", DisplayDetails),
                                                                                                   ActionDateDisplay:
                                                                                                       Text(
                                                                                                           DateTimeValue(
-                                                                                                              LookUp(
-                                                                                                                  colScopeChangeLogs,
-                                                                                                                  LogGroupID = grp.Value &&
-                                                                                                                  Field = "Updated By",
-                                                                                                                  ActionOn
-                                                                                                              )
+                                                                                                              LookUp(colScopeChangeLogs, LogGroupID = grp.Value && Field = "Updated By", ActionOn)
                                                                                                           ),
                                                                                                           "[$-en-US]mmmm d, yyyy ""at"" h:mm:ss AM/PM"
                                                                                                       )
                                                                                               }
                                                                                           )
                                                                                       );
-
-                                                                                      /* Show newest Edit first */
                                                                                       ClearCollect(
                                                                                           colAddNewLogCard,
-                                                                                          SortByColumns(
-                                                                                              colAddNewLogCard,
-                                                                                              "ActionDateDisplay",
-                                                                                              SortOrder.Descending
-                                                                                          )
+                                                                                          SortByColumns(colAddNewLogCard, "ActionDateDisplay", SortOrder.Descending)
                                                                                       );
-
-                                                                                      UpdateContext(
-                                                                                          {
-                                                                                              locShowChangeLogPopup: true
-                                                                                          }
-                                                                                      );
+                                                                                      UpdateContext({locShowChangeLogPopup: true});
                                                                                     PaddingBottom: =0
                                                                                     PaddingLeft: =0
                                                                                     PaddingRight: =0
@@ -14992,46 +14889,24 @@ Screens:
                                                                                     HoverFill: =ColorValue("#EB1700")
                                                                                     OnSelect: |-
                                                                                       =Set(varLoading,true);
-
-                                                                                      Set(
-                                                                                          varSelectedScopeRecord,
-                                                                                          ThisItem
-                                                                                      );
-
-                                                                                      Set(
-                                                                                          varSelectedRiskNo,
-                                                                                          ThisItem.ScopeNo
-                                                                                      );
-
-                                                                                      Set(
-                                                                                          varOldScopeSampleSize,
-                                                                                          ThisItem.'Proposed Sample Size'
-                                                                                      );
-
-                                                                                      Set(
-                                                                                          varOldScopeSummary,
-                                                                                          ThisItem.'Summary of Risks'
-                                                                                      );
-
-                                                                                      Set(
-                                                                                          varOldIncludedInScope,
-                                                                                          ThisItem.IncludedInScope
-                                                                                      );
-
+                                                                                      Set(varScopeKey, Text(ThisItem.' CPR_tb_Scope'));
+                                                                                      Set(varScopeSerial, ThisItem.SerialNo);
+                                                                                      Set(varOldScopeRecord, ThisItem);
+                                                                                      Set(varSelectedScopeRecord, ThisItem);
+                                                                                      Set(varSelectedRiskNo, ThisItem.ScopeNo);
+                                                                                      Set(varOldScopeSampleSize, ThisItem.'Proposed Sample Size');
+                                                                                      Set(varOldScopeSummary, ThisItem.'Summary of Risks');
+                                                                                      Set(varOldIncludedInScope, ThisItem.IncludedInScope);
                                                                                       ClearCollect(
                                                                                           colOldScopeAttachments,
-                                                                                          ForAll(
-                                                                                              ThisItem.Attachments As OldAttachment,
-                                                                                              {
-                                                                                                  FileName: OldAttachment.DisplayName
-                                                                                              }
-                                                                                          )
+                                                                                          ForAll(ThisItem.Attachments As OldAttachment, {FileName: OldAttachment.DisplayName})
                                                                                       );
-
+                                                                                      ClearCollect(colNewScopeAttachments, {FileName: ""});
+                                                                                      Clear(colNewScopeAttachments);
+                                                                                      Set(varNewScopeRec, Blank());
                                                                                       Set(varAddNewRisk, false);
                                                                                       Set(varEditRisk, true);
                                                                                       UpdateContext({locDisplayEditPopUpScope: true});
-                                                                                      Set(varSelectedRiskNo, ThisItem.ScopeNo);
                                                                                       Set(varLoading,false);
                                                                                     PaddingBottom: =0
                                                                                     PaddingLeft: =0
@@ -15142,159 +15017,78 @@ Screens:
                                                                                     HoverColor: =RGBA(0, 0, 0, 1)
                                                                                     HoverFill: =RGBA(255, 255, 255, 1)
                                                                                     OnSelect: |-
-                                                                                      =Set(
-                                                                                          varLogScopeNo,
-                                                                                          Text(ThisItem.ScopeNo)
-                                                                                      );
-
-                                                                                      Set(
-                                                                                          varLogEngagementNo,
-                                                                                          Text(varSelectedEngagementNo)
-                                                                                      );
-
-                                                                                      Set(
-                                                                                          varChangeLogRiskID,
-                                                                                          Text(ThisItem.ScopeNo)
-                                                                                      );
-
-                                                                                      /* Get Scope-specific Change Log records */
+                                                                                      =Set(varScopeKey, Text(ThisItem.' CPR_tb_Scope'));
+                                                                                      Set(varScopeSerial, ThisItem.SerialNo);
+                                                                                      Set(varLogScopeNo, Text(ThisItem.ScopeNo));
+                                                                                      Set(varLogEngagementNo, Text(varSelectedEngagementNo));
+                                                                                      Set(varChangeLogRiskID, Text(ThisItem.SerialNo));
                                                                                       Refresh(CPR_RiskAnalysis_ChangeLogs);
-
                                                                                       ClearCollect(
                                                                                           colScopeChangeLogs,
                                                                                           Filter(
                                                                                               CPR_RiskAnalysis_ChangeLogs,
-                                                                                              engagement_number = varLogEngagementNo &&
-                                                                                              EntityID = varLogScopeNo &&
-                                                                                              SectionID = "5" &&
-                                                                                              EntityType = "Scope"
+                                                                                              EntityType = "Scope" &&
+                                                                                              (
+                                                                                                  EntityID = varScopeKey ||
+                                                                                                  (
+                                                                                                      !IsBlank(ThisItem.ScopeNo) &&
+                                                                                                      EntityID = Text(ThisItem.ScopeNo) &&
+                                                                                                      (engagement_number = Text(varRAEngagementNo) || engagement_number = Text(varSelectedEngagementNo))
+                                                                                                  )
+                                                                                              )
                                                                                           )
                                                                                       );
-
-                                                                                      /* Build cards shown in existing Change Log popup */
                                                                                       Clear(colAddNewLogCard);
-
-                                                                                      /* ==============================
-                                                                                         ADD NEW / SYSTEM GENERATED SCOPE
-                                                                                         ============================== */
-
                                                                                       Collect(
                                                                                           colAddNewLogCard,
                                                                                           {
-                                                                                              QuestionTitle:
-                                                                                                  "Scope ID: " & varLogScopeNo,
-
-                                                                                              SectionLabel:
-                                                                                                  "Add New",
-
-                                                                                              TypeOfChangeText:
-                                                                                                  "System or user adds a new scope in AI Scope",
-
-                                                                                              DetailsText:
-                                                                                                  "",
-
+                                                                                              QuestionTitle: "Scope ID: " & Text(varScopeSerial),
+                                                                                              SectionLabel: "Add New",
+                                                                                              TypeOfChangeText: "System or user adds a new scope in AI Scope",
+                                                                                              DetailsText: "",
                                                                                               ActionByDisplay:
                                                                                                   Coalesce(
-                                                                                                      LookUp(
-                                                                                                          colScopeChangeLogs,
-                                                                                                          ActionCode = "ADD_SCOPE" &&
-                                                                                                          Field = "Added By",
-                                                                                                          DisplayDetails
-                                                                                                      ),
+                                                                                                      LookUp(colScopeChangeLogs, ActionCode = "ADD_SCOPE" && Field = "Added By", DisplayDetails),
                                                                                                       "System"
                                                                                                   ),
-
                                                                                               ActionDateDisplay:
                                                                                                   Coalesce(
-                                                                                                      LookUp(
-                                                                                                          colScopeChangeLogs,
-                                                                                                          ActionCode = "ADD_SCOPE" &&
-                                                                                                          Field = "Date Added",
-                                                                                                          DisplayDetails
-                                                                                                      ),
-                                                                                                      Text(
-                                                                                                          ThisItem.'Created On',
-                                                                                                          "[$-en-US]mmmm d, yyyy ""at"" h:mm:ss AM/PM"
-                                                                                                      )
+                                                                                                      LookUp(colScopeChangeLogs, ActionCode = "ADD_SCOPE" && Field = "Date Added", DisplayDetails),
+                                                                                                      Text(ThisItem.'Created On', "[$-en-US]mmmm d, yyyy ""at"" h:mm:ss AM/PM")
                                                                                                   )
                                                                                           }
                                                                                       );
-
-                                                                                      /* ==============================
-                                                                                         EDIT HISTORY
-                                                                                         ============================== */
-
                                                                                       ForAll(
-                                                                                          Distinct(
-                                                                                              Filter(
-                                                                                                  colScopeChangeLogs,
-                                                                                                  ActionCode = "EDIT_SCOPE"
-                                                                                              ),
-                                                                                              LogGroupID
-                                                                                          ) As grp,
-
+                                                                                          Distinct(Filter(colScopeChangeLogs, ActionCode = "EDIT_SCOPE"), LogGroupID) As grp,
                                                                                           Collect(
                                                                                               colAddNewLogCard,
                                                                                               {
-                                                                                                  QuestionTitle:
-                                                                                                      "Scope ID: " & varLogScopeNo,
-
-                                                                                                  SectionLabel:
-                                                                                                      "Edit",
-
-                                                                                                  TypeOfChangeText:
-                                                                                                      "Scope updated",
-
+                                                                                                  QuestionTitle: "Scope ID: " & Text(varScopeSerial),
+                                                                                                  SectionLabel: "Edit",
+                                                                                                  TypeOfChangeText: "Scope updated",
                                                                                                   DetailsText:
                                                                                                       Concat(
-                                                                                                          Filter(
-                                                                                                              colScopeChangeLogs,
-                                                                                                              LogGroupID = grp.Value &&
-                                                                                                              Field = "Change Details"
-                                                                                                          ),
+                                                                                                          Filter(colScopeChangeLogs, LogGroupID = grp.Value && Field = "Change Details"),
                                                                                                           DisplayDetails,
                                                                                                           Char(10)
                                                                                                       ),
-
                                                                                                   ActionByDisplay:
-                                                                                                      LookUp(
-                                                                                                          colScopeChangeLogs,
-                                                                                                          LogGroupID = grp.Value &&
-                                                                                                          Field = "Updated By",
-                                                                                                          DisplayDetails
-                                                                                                      ),
-
+                                                                                                      LookUp(colScopeChangeLogs, LogGroupID = grp.Value && Field = "Updated By", DisplayDetails),
                                                                                                   ActionDateDisplay:
                                                                                                       Text(
                                                                                                           DateTimeValue(
-                                                                                                              LookUp(
-                                                                                                                  colScopeChangeLogs,
-                                                                                                                  LogGroupID = grp.Value &&
-                                                                                                                  Field = "Updated By",
-                                                                                                                  ActionOn
-                                                                                                              )
+                                                                                                              LookUp(colScopeChangeLogs, LogGroupID = grp.Value && Field = "Updated By", ActionOn)
                                                                                                           ),
                                                                                                           "[$-en-US]mmmm d, yyyy ""at"" h:mm:ss AM/PM"
                                                                                                       )
                                                                                               }
                                                                                           )
                                                                                       );
-
-                                                                                      /* Show newest Edit first */
                                                                                       ClearCollect(
                                                                                           colAddNewLogCard,
-                                                                                          SortByColumns(
-                                                                                              colAddNewLogCard,
-                                                                                              "ActionDateDisplay",
-                                                                                              SortOrder.Descending
-                                                                                          )
+                                                                                          SortByColumns(colAddNewLogCard, "ActionDateDisplay", SortOrder.Descending)
                                                                                       );
-
-                                                                                      UpdateContext(
-                                                                                          {
-                                                                                              locShowChangeLogPopup: true
-                                                                                          }
-                                                                                      );
+                                                                                      UpdateContext({locShowChangeLogPopup: true});
                                                                                     PaddingBottom: =0
                                                                                     PaddingLeft: =0
                                                                                     PaddingRight: =0
@@ -17605,6 +17399,65 @@ Screens:
                         Height: =Parent.Height-100
                         LayoutMinHeight: =16
                         LayoutMinWidth: =0
+                        OnFailure: |-
+                          =Notify("Add scope failed: " & frm_AddScope_1.Error, NotificationType.Error, 8000);
+                          Set(varLoading, false);
+                        OnSuccess: |-
+                          =Set(varLoading, false);
+                          Refresh(' CPR_tb_Scopes');
+                          Set(
+                              varAddScopeGuid,
+                              Coalesce(
+                                  Text(frm_AddScope_1.LastSubmit.' CPR_tb_Scope'),
+                                  Text(First(Sort(Filter(' CPR_tb_Scopes', EngagementNo = varRAEngagementNo), 'Created On', SortOrder.Descending)).' CPR_tb_Scope')
+                              )
+                          );
+                          Set(varAddLogGroupID, GUID());
+                          Set(varAddActionOn, Now());
+                          Patch(CPR_RiskAnalysis_ChangeLogs, Defaults(CPR_RiskAnalysis_ChangeLogs), {
+                              Name: Text(varAddLogGroupID) & "-1",
+                              ActionCode: "ADD_SCOPE",
+                              ActionByEmail: User().Email,
+                              ActionByName: User().FullName,
+                              ActionOn: Text(varAddActionOn, "[$-en-US]mmmm dd, yyyy h:mm:ss AM/PM"),
+                              SequenceNo: "1",
+                              LogGroupID: Text(varAddLogGroupID),
+                              DisplayDetails: User().FullName & " | " & User().Email,
+                              Field: "Added By",
+                              engagement_number: Text(varRAEngagementNo),
+                              QuestionID: varAddScopeGuid,
+                              EntityID: varAddScopeGuid,
+                              SectionID: "5",
+                              EntityType: "Scope",
+                              FormType: "Risk Analysis",
+                              Section: "Scope Add",
+                              IsSystemGenerated: false,
+                              TypeOfChange: "Add New"
+                          });
+                          Patch(CPR_RiskAnalysis_ChangeLogs, Defaults(CPR_RiskAnalysis_ChangeLogs), {
+                              Name: Text(varAddLogGroupID) & "-2",
+                              ActionCode: "ADD_SCOPE",
+                              ActionByEmail: User().Email,
+                              ActionByName: User().FullName,
+                              ActionOn: Text(varAddActionOn, "[$-en-US]mmmm dd, yyyy h:mm:ss AM/PM"),
+                              SequenceNo: "2",
+                              LogGroupID: Text(varAddLogGroupID),
+                              DisplayDetails: Text(varAddActionOn, "[$-en-US]mmmm d, yyyy ""at"" h:mm:ss AM/PM"),
+                              Field: "Date Added",
+                              engagement_number: Text(varRAEngagementNo),
+                              QuestionID: varAddScopeGuid,
+                              EntityID: varAddScopeGuid,
+                              SectionID: "5",
+                              EntityType: "Scope",
+                              FormType: "Risk Analysis",
+                              Section: "Scope Add",
+                              IsSystemGenerated: false,
+                              TypeOfChange: "Add New"
+                          });
+                          Refresh(CPR_RiskAnalysis_ChangeLogs);
+                          UpdateContext({locDisplayAddPopUpScope: false});
+                          ResetForm(frm_AddScope_1);
+                          Notify("Scope added successfully", NotificationType.Success);
                         Width: =Parent.Width
                       Children:
                         - Scope Area_DataCard2_2:
@@ -18367,6 +18220,12 @@ Screens:
                               LayoutMinWidth: =16
                               OnSelect: |
                                 =Set(varLoading,true);
+                                If(
+                                    IsBlank(Trim(DataCardValue22_2.Text)),
+                                    Notify("Please provide the reason for adding the new scope", NotificationType.Warning),
+                                    Set(varLoading, true);
+                                    SubmitForm(frm_AddScope_1)
+                                )
 
                                 /*Switch(
                                     locFormMode,
@@ -18656,13 +18515,15 @@ Screens:
 
                                 Select(Button5_8);
                                 */
+                                /*
 
                                 SubmitForm(frm_AddScope_1);
                                 UpdateContext({locDisplayAddPopUpScope:false});
                                 ResetForm(frm_AddScope_1);
                                 Set(varSelectedQuestionID,Blank());
                                 Set(varNextQuestionID,Blank());
-                                Set(varLoading,false);
+                                */
+                                ;Set(varLoading,false);
                               PressedBorderColor: =
                               PressedColor: =ColorValue("#004685")
                               PressedFill: =
@@ -20348,291 +20209,117 @@ Screens:
                         DataSource: =' CPR_tb_Scopes'
                         FillPortions: =0
                         Height: =Parent.Height-100
-                        Item: |
-                          =LookUp(' CPR_tb_Scopes',ScopeNo=varSelectedRiskNo)
+                        Item: =LookUp(' CPR_tb_Scopes', ' CPR_tb_Scope' = GUID(varScopeKey))
                         LayoutMinHeight: =16
                         LayoutMinWidth: =0
+                        OnFailure: |-
+                          =Notify("Scope save failed: " & frm_EditScope_1.Error, NotificationType.Error, 8000);
+                          Set(varLoading, false);
                         OnSuccess: |-
-                          =Set(
-                              varUpdatedScopeRecord,
-                              frm_EditScope_1.LastSubmit
-                          );
-
+                          =Set(varLoading, false);
+                          Set(varScopeLogGroupID, GUID());
+                          Set(varScopeActionOn, Now());
+                          Set(varNewScopeSampleSize, Coalesce(varNewScopeRec.SampleSize, Text(DataCardValue23_3.Text)));
+                          Set(varNewScopeSummary, Coalesce(varNewScopeRec.Summary, DataCardValue20_3.Text, ""));
+                          Set(varNewScopeReason, Coalesce(varNewScopeRec.Reason, DataCardValue22_3.Text, ""));
+                          Set(varNewScopeCategory, Coalesce(varNewScopeRec.Category, Text(DataCardValue18_3.Selected.Value), ""));
+                          Set(varNewScopeArea, Coalesce(varNewScopeRec.ScopeArea, Text(DataCardValue19_3.Selected.Value), ""));
                           Set(
-                              varScopeLogGroupID,
-                              GUID()
-                          );
-
-                          Set(
-                              varScopeActionOn,
-                              Now()
-                          );
-
-                          Set(
-                              varScopeChangeSummary,
-                              ""
-                          );
-
-                          If(
-                              Coalesce(
-                                  Text(varOldScopeSampleSize),
-                                  ""
-                              ) <>
-                              Coalesce(
-                                  Text(varUpdatedScopeRecord.'Proposed Sample Size'),
-                                  ""
-                              ),
-                              Set(
-                                  varScopeChangeSummary,
-                                  varScopeChangeSummary &
-                                  "Changed Proposed Sample Size from '" &
-                                  Coalesce(
-                                      Text(varOldScopeSampleSize),
-                                      ""
-                                  ) &
-                                  "' to '" &
-                                  Coalesce(
-                                      Text(varUpdatedScopeRecord.'Proposed Sample Size'),
-                                      ""
-                                  ) &
-                                  "'" &
-                                  Char(10) & Char(10)
-                              )
-                          );
-
-                          If(
-                              Coalesce(
-                                  Text(varOldScopeSummary),
-                                  ""
-                              ) <>
-                              Coalesce(
-                                  Text(varUpdatedScopeRecord.'Summary of Risks'),
-                                  ""
-                              ),
-                              Set(
-                                  varScopeChangeSummary,
-                                  varScopeChangeSummary &
-                                  "Changed Summary of Risks from '" &
-                                  Coalesce(
-                                      Text(varOldScopeSummary),
-                                      ""
-                                  ) &
-                                  "' to '" &
-                                  Coalesce(
-                                      Text(varUpdatedScopeRecord.'Summary of Risks'),
-                                      ""
-                                  ) &
-                                  "'" &
-                                  Char(10) & Char(10)
-                              )
-                          );
-
-                          If(
-                              varOldIncludedInScope <>
-                              varUpdatedScopeRecord.IncludedInScope,
-                              Set(
-                                  varScopeChangeSummary,
-                                  varScopeChangeSummary &
-                                  "Included in Final Scope from " &
-                                  If(
-                                      varOldIncludedInScope,
-                                      "Yes",
-                                      "No"
-                                  ) &
-                                  " to " &
-                                  If(
-                                      varUpdatedScopeRecord.IncludedInScope,
-                                      "Yes",
-                                      "No"
-                                  ) &
-                                  Char(10) & Char(10)
-                              )
-                          );
-
-                          Set(
-                              varScopeChangeSummary,
-                              varScopeChangeSummary &
+                              varScopeFieldChanges,
                               Concat(
                                   Filter(
-                                      DataCardValue26_3.Attachments,
-                                      !(Name in colOldScopeAttachments.FileName)
+                                      Table(
+                                          {Label: "Scope Area", OldVal: Text(varOldScopeRecord.'Scope Area'), NewVal: varNewScopeArea},
+                                          {Label: "Overall Risk Category", OldVal: Text(varOldScopeRecord.'Risk Category'), NewVal: varNewScopeCategory},
+                                          {Label: "Proposed Sample Size", OldVal: Text(varOldScopeRecord.'Proposed Sample Size'), NewVal: varNewScopeSampleSize},
+                                          {Label: "Summary of Risks", OldVal: Text(varOldScopeRecord.'Summary of Risks'), NewVal: varNewScopeSummary}
+                                      ),
+                                      Trim(Substitute(Substitute(Coalesce(OldVal, ""), Char(13), ""), Char(10), "")) <>
+                                      Trim(Substitute(Substitute(Coalesce(NewVal, ""), Char(13), ""), Char(10), ""))
                                   ),
-                                  "Uploaded <" &
-                                  Name &
-                                  ">" &
-                                  Char(10) & Char(10)
+                                  "Changed " & Label & " from '" & OldVal & "' to '" & NewVal & "'" & Char(10) & Char(10)
+                              ) &
+                              Concat(
+                                  Filter(colNewScopeAttachments, !IsBlank(FileName) && !(FileName in colOldScopeAttachments.FileName)),
+                                  "Uploaded <" & FileName & ">" & Char(10) & Char(10)
+                              ) &
+                              Concat(
+                                  Filter(colOldScopeAttachments, !(FileName in colNewScopeAttachments.FileName)),
+                                  "Removed <" & FileName & ">" & Char(10) & Char(10)
                               )
                           );
-
                           Set(
                               varScopeChangeSummary,
-                              varScopeChangeSummary &
-                              Concat(
-                                  Filter(
-                                      colOldScopeAttachments,
-                                      !(FileName in DataCardValue26_3.Attachments.Name)
-                                  ),
-                                  "Removed <" &
-                                  FileName &
-                                  ">" &
-                                  Char(10) & Char(10)
+                              varScopeFieldChanges &
+                              If(
+                                  !IsBlank(Trim(varNewScopeReason)),
+                                  "Reason for Change: " & varNewScopeReason,
+                                  ""
                               )
                           );
-
                           If(
-                              !IsBlank(
-                                  Trim(varScopeChangeSummary)
-                              ),
-
+                              Len(Trim(varScopeFieldChanges)) > 0,
                               Patch(
                                   CPR_RiskAnalysis_ChangeLogs,
                                   Defaults(CPR_RiskAnalysis_ChangeLogs),
                                   {
-                                      Name:
-                                          Text(varScopeLogGroupID) & "-1",
-
-                                      ActionCode:
-                                          "EDIT_SCOPE",
-
-                                      ActionByEmail:
-                                          User().Email,
-
-                                      ActionByName:
-                                          User().FullName,
-
-                                      ActionOn:
-                                          Text(
-                                              varScopeActionOn,
-                                              "[$-en-US]mmmm dd, yyyy h:mm:ss AM/PM"
-                                          ),
-
-                                      SequenceNo:
-                                          "1",
-
-                                      LogGroupID:
-                                          Text(varScopeLogGroupID),
-
-                                      DisplayDetails:
-                                          User().FullName &
-                                          " | " &
-                                          User().Email,
-
-                                      Field:
-                                          "Updated By",
-
-                                      engagement_number:
-                                          Text(varSelectedEngagementNo),
-
-                                      QuestionID:
-                                          Text(varUpdatedScopeRecord.ScopeNo),
-
-                                      EntityID:
-                                          Text(varUpdatedScopeRecord.ScopeNo),
-
-                                      SectionID:
-                                          "5",
-
-                                      EntityType:
-                                          "Scope",
-
-                                      FormType:
-                                          "Risk Analysis",
-
-                                      Section:
-                                          "Scope Update",
-
-                                      IsSystemGenerated:
-                                          false,
-
-                                      TypeOfChange:
-                                          "Edit"
+                                      Name: Text(varScopeLogGroupID) & "-1",
+                                      ActionCode: "EDIT_SCOPE",
+                                      ActionByEmail: User().Email,
+                                      ActionByName: User().FullName,
+                                      ActionOn: Text(varScopeActionOn, "[$-en-US]mmmm dd, yyyy h:mm:ss AM/PM"),
+                                      SequenceNo: "1",
+                                      LogGroupID: Text(varScopeLogGroupID),
+                                      DisplayDetails: User().FullName & " | " & User().Email,
+                                      Field: "Updated By",
+                                      engagement_number: Text(varRAEngagementNo),
+                                      QuestionID: varScopeKey,
+                                      EntityID: varScopeKey,
+                                      SectionID: "5",
+                                      EntityType: "Scope",
+                                      FormType: "Risk Analysis",
+                                      Section: "Scope Update",
+                                      IsSystemGenerated: false,
+                                      TypeOfChange: "Edit"
                                   }
                               );
-
                               Patch(
                                   CPR_RiskAnalysis_ChangeLogs,
                                   Defaults(CPR_RiskAnalysis_ChangeLogs),
                                   {
-                                      Name:
-                                          Text(varScopeLogGroupID) & "-2",
-
-                                      ActionCode:
-                                          "EDIT_SCOPE",
-
-                                      ActionByEmail:
-                                          User().Email,
-
-                                      ActionByName:
-                                          User().FullName,
-
-                                      ActionOn:
-                                          Text(
-                                              varScopeActionOn,
-                                              "[$-en-US]mmmm dd, yyyy h:mm:ss AM/PM"
-                                          ),
-
-                                      SequenceNo:
-                                          "2",
-
-                                      LogGroupID:
-                                          Text(varScopeLogGroupID),
-
-                                      DisplayDetails:
-                                          Trim(varScopeChangeSummary),
-
-                                      Field:
-                                          "Change Details",
-
-                                      engagement_number:
-                                          Text(varSelectedEngagementNo),
-
-                                      QuestionID:
-                                          Text(varUpdatedScopeRecord.ScopeNo),
-
-                                      EntityID:
-                                          Text(varUpdatedScopeRecord.ScopeNo),
-
-                                      SectionID:
-                                          "5",
-
-                                      EntityType:
-                                          "Scope",
-
-                                      FormType:
-                                          "Risk Analysis",
-
-                                      Section:
-                                          "Scope Update",
-
-                                      IsSystemGenerated:
-                                          false,
-
-                                      TypeOfChange:
-                                          "Edit"
+                                      Name: Text(varScopeLogGroupID) & "-2",
+                                      ActionCode: "EDIT_SCOPE",
+                                      ActionByEmail: User().Email,
+                                      ActionByName: User().FullName,
+                                      ActionOn: Text(varScopeActionOn, "[$-en-US]mmmm dd, yyyy h:mm:ss AM/PM"),
+                                      SequenceNo: "2",
+                                      LogGroupID: Text(varScopeLogGroupID),
+                                      DisplayDetails: Trim(varScopeChangeSummary),
+                                      Field: "Change Details",
+                                      engagement_number: Text(varRAEngagementNo),
+                                      QuestionID: varScopeKey,
+                                      EntityID: varScopeKey,
+                                      SectionID: "5",
+                                      EntityType: "Scope",
+                                      FormType: "Risk Analysis",
+                                      Section: "Scope Update",
+                                      IsSystemGenerated: false,
+                                      TypeOfChange: "Edit"
                                   }
+                              );
+                              If(
+                                  !IsEmpty(Errors(CPR_RiskAnalysis_ChangeLogs)),
+                                  Notify("Change log failed: " & First(Errors(CPR_RiskAnalysis_ChangeLogs)).Message, NotificationType.Error, 8000)
                               )
                           );
-
                           Refresh(CPR_RiskAnalysis_ChangeLogs);
-
                           Refresh(' CPR_tb_Scopes');
-
-                          UpdateContext(
-                              {
-                                  locDisplayEditPopUp: false
-                              }
-                          );
-
+                          UpdateContext({locDisplayEditPopUpScope: false});
                           ResetForm(frm_EditScope_1);
-
-                          Clear(
-                              colOldScopeAttachments
-                          );
-
-                          Set(
-                              varLoading,
-                              false
-                          );
+                          Clear(colOldScopeAttachments);
+                          Clear(colNewScopeAttachments);
+                          Set(varOldScopeRecord, Blank());
+                          Set(varNewScopeRec, Blank());
                         Width: =Parent.Width
                       Children:
                         - Scope Area_DataCard2_3:
@@ -21391,304 +21078,27 @@ Screens:
                               HoverFill: =
                               LayoutMinHeight: =16
                               LayoutMinWidth: =16
-                              OnSelect: |
-                                =Set(varLoading,true);
-
-                                /*Switch(
-                                    locFormMode,
-
-                                    "Add New IDR Question",
-
+                              OnSelect: |-
+                                =If(
+                                    IsBlank(Trim(DataCardValue22_3.Text)),
+                                    Notify("Please provide Reason for change", NotificationType.Warning),
+                                    Set(varLoading, true);
                                     Set(
-                                        varPayloadCreateQuestion,
+                                        varNewScopeRec,
                                         {
-                                            EngagementNo: varSelectedEngagementNo,
-                                            SectionID: varSelectedSectionID,
-                                            QuestionID: varNextQuestionID,
-                                            Question: DataCardValue3_4.Text,
-                                            BusinessUnit: DataCardValue6_5.Text,
-                                            RequestArea: DataCardValue8_3.Text,
-                                            ResponseDueBy: drpResponseDueBy_3.Selected.DueDate,
-                                            FieldType: DataCardValue7_3.Selected.Value,
-                                            CreatedBy: User().Email
+                                            SampleSize: Text(DataCardValue23_3.Text),
+                                            Summary: Coalesce(DataCardValue20_3.Text, ""),
+                                            Reason: Coalesce(DataCardValue22_3.Text, ""),
+                                            Category: Text(DataCardValue18_3.Selected.Value),
+                                            ScopeArea: Text(DataCardValue19_3.Selected.Value)
                                         }
                                     );
-
-                                    Set(
-                                        varCreateResponse,
-                                        'CPR_Questions_Create-Nandha'.Run(
-                                            JSON(varPayloadCreateQuestion)
-                                        )
-                                    );
-
-                                    If(
-                                        !IsBlank(varCreateResponse),
-
-                                        Set(varCreatedQuestionID, Text(varNextQuestionID));
-                                        Set(varLogGroupID, GUID());
-                                        Set(varActionOn, Now());
-
-                                        ClearCollect(
-                                            colActivityLog,
-                                            {
-                                                LogID: GUID(),
-                                                LogGroupID: varLogGroupID,
-                                                EngagementNo: Text(varSelectedEngagementNo),
-                                                SectionID: varSelectedSectionID,
-                                                QuestionID: varNextQuestionID,
-                                                FormType: "IDR",
-                                                EntityType: "Question",
-                                                EntityID: varCreatedQuestionID,
-                                                ActionCode: "Q_ADD",
-                                                TypeOfChange: "Question Added",
-                                                Section: "Add New",
-                                                Field: "Added By",
-                                                DisplayDetails: User().FullName & " | " & User().Email,
-                                                Comments: "",
-                                                ActionByName: User().FullName,
-                                                ActionByEmail: User().Email,
-                                                ActionOn: varActionOn,
-                                                SortOn: varActionOn,
-                                                SequenceNo: 1,
-                                                IsSystemGenerated: false
-                                            },
-                                            {
-                                                LogID: GUID(),
-                                                LogGroupID: varLogGroupID,
-                                                EngagementNo: Text(varSelectedEngagementNo),
-                                                SectionID: varSelectedSectionID,
-                                                QuestionID: varNextQuestionID,
-                                                FormType: "IDR",
-                                                EntityType: "Question",
-                                                EntityID: varCreatedQuestionID,
-                                                ActionCode: "Q_ADD",
-                                                TypeOfChange: "Question Added",
-                                                Section: "Add New",
-                                                Field: "Date Added",
-                                                DisplayDetails: Text(
-                                                    varActionOn,
-                                                    "[$-en-US]mmmm d, yyyy ""at"" h:mm:ss AM/PM"
-                                                ),
-                                                Comments: "",
-                                                ActionByName: User().FullName,
-                                                ActionByEmail: User().Email,
-                                                ActionOn: varActionOn,
-                                                SortOn: varActionOn,
-                                                SequenceNo: 2,
-                                                IsSystemGenerated: false
-                                            }
-                                        );
-
-                                        Set(
-                                            varActivityLogResponse,
-                                            CPR_ActivityLog_Save.Run(
-                                                JSON(
-                                                    colActivityLog,
-                                                    JSONFormat.Compact
-                                                )
-                                            )
-                                        );
-
-                                        Notify(
-                                            "Record created successfully",
-                                            NotificationType.Success
-                                        )
-                                    ),
-
-                                    "Edit IDR Question",
-
-                                    Set(
-                                        varPayloadUpdateQuestion,
-                                        {
-                                            EngagementNo: varSelectedEngagementNo,
-                                            SectionID: varSelectedSectionID,
-                                            QuestionID: DataCardValue2_4.Text,
-                                            GUID: varSelectedQuestionGUID,
-                                            Question: DataCardValue3_4.Text,
-                                            BusinessUnit: DataCardValue6_5.Text,
-                                            RequestArea: DataCardValue8_3.Text,
-                                            ResponseDueBy: drpResponseDueBy_3.Selected.DueDate,
-                                            FieldType: DataCardValue7_3.Selected.Value,
-                                            UpdatedBy: User().Email
-                                        }
-                                    );
-
-                                    Set(
-                                        varUpdateResponse,
-                                        CPR_IDR_Questions_Update.Run(
-                                            JSON(varPayloadUpdateQuestion)
-                                        )
-                                    );
-
-                                    Set(
-                                        varPayloadEditQuestion,
-                                        {
-                                            EngagementNo: varSelectedEngagementNo,
-                                            SectionID: varSelectedSectionID,
-                                            QuestionID: varSelectedQuestionID,
-                                            GUID: varSelectedQuestionGUID,
-                                            IsEdited: false,
-                                            EditedBy: User().Email
-                                        }
-                                    );
-
-                                    Set(
-                                        varEditResponse,
-                                        CPR_IDR_Questions_Edit.Run(
-                                            JSON(varPayloadEditQuestion)
-                                        ).response
-                                    );
-
-                                If(
-                                    !IsBlank(varUpdateResponse),
-
-                                    Set(varChangeText,"");
-
-                                    If(
-                                        Coalesce(varOldQuestion,"") <> Coalesce(DataCardValue3_4.Text,""),
-                                        Set(
-                                            varChangeText,
-                                            varChangeText &
-                                            "Question changed from '" &
-                                            varOldQuestion &
-                                            "' to '" &
-                                            DataCardValue3_4.Text &
-                                            "'" & Char(10)
-                                        )
-                                    );
-
-                                    If(
-                                        Coalesce(varOldBusinessUnit,"") <> Coalesce(DataCardValue6_5.Text,""),
-                                        Set(
-                                            varChangeText,
-                                            varChangeText &
-                                            "Business Unit changed from '" &
-                                            varOldBusinessUnit &
-                                            "' to '" &
-                                            DataCardValue6_5.Text &
-                                            "'" & Char(10)
-                                        )
-                                    );
-
-                                    If(
-                                        Coalesce(varOldRequestArea,"") <> Coalesce(DataCardValue8_3.Text,""),
-                                        Set(
-                                            varChangeText,
-                                            varChangeText &
-                                            "Request Area changed from '" &
-                                            varOldRequestArea &
-                                            "' to '" &
-                                            DataCardValue8_3.Text &
-                                            "'" & Char(10)
-                                        )
-                                    );
-
-                                    If(
-                                        Coalesce(varOldFieldType,"") <> Coalesce(DataCardValue7_3.Selected.Value,""),
-                                        Set(
-                                            varChangeText,
-                                            varChangeText &
-                                            "Field Type changed from '" &
-                                            varOldFieldType &
-                                            "' to '" &
-                                            DataCardValue7_3.Selected.Value &
-                                            "'" & Char(10)
-                                        )
-                                    );
-
-                                    If(
-                                        Text(varOldResponseDueBy,"yyyy-mm-dd") <>
-                                        Text(drpResponseDueBy_3.Selected.DueDate,"yyyy-mm-dd"),
-                                        Set(
-                                            varChangeText,
-                                            varChangeText &
-                                            "Response Due By changed from '" &
-                                            Text(varOldResponseDueBy,"dd-mmm-yyyy") &
-                                            "' to '" &
-                                            Text(drpResponseDueBy_3.Selected.DueDate,"dd-mmm-yyyy") &
-                                            "'" & Char(10)
-                                        )
-                                    );
-
-                                    Set(varLogGroupID, GUID());
-                                    Set(varActionOn, Now());
-
                                     ClearCollect(
-                                        colActivityLog,
-
-                                            {
-                                                LogID: GUID(),
-                                                LogGroupID: varLogGroupID,
-                                                EngagementNo: Text(varSelectedEngagementNo),
-                                                SectionID: varSelectedSectionID,
-                                                QuestionID: Value(DataCardValue2_4.Text),
-                                                FormType: "IDR",
-                                                EntityType: "Question",
-                                                EntityID: DataCardValue2_4.Text,
-                                                ActionCode: "Q_EDIT",
-                                                TypeOfChange: "Question Updated",
-                                                Section: "Edit",
-                                                Field: "Updated By",
-                                                DisplayDetails: User().FullName & " | " & User().Email,
-                                                Comments: "",
-                                                ActionByName: User().FullName,
-                                                ActionByEmail: User().Email,
-                                                ActionOn: varActionOn,
-                                                SortOn: varActionOn,
-                                                SequenceNo: 1,
-                                                IsSystemGenerated: false
-                                            },
-
-                                            {
-                                                LogID: GUID(),
-                                                LogGroupID: varLogGroupID,
-                                                EngagementNo: Text(varSelectedEngagementNo),
-                                                SectionID: varSelectedSectionID,
-                                                QuestionID: Value(DataCardValue2_4.Text),
-                                                FormType: "IDR",
-                                                EntityType: "Question",
-                                                EntityID: DataCardValue2_4.Text,
-                                                ActionCode: "Q_EDIT",
-                                                TypeOfChange: "Question Updated",
-                                                Section: "Edit",
-                                                Field: "Details Updated",
-                                                DisplayDetails:varChangeText,
-                                                Comments: "",
-                                                ActionByName: User().FullName,
-                                                ActionByEmail: User().Email,
-                                                ActionOn: varActionOn,
-                                                SortOn: varActionOn,
-                                                SequenceNo: 2,
-                                                IsSystemGenerated: false
-                                            }
-                                        );
-
-                                        Set(
-                                            varActivityLogResponse,
-                                            CPR_ActivityLog_Save.Run(
-                                                JSON(
-                                                    colActivityLog,
-                                                    JSONFormat.Compact
-                                                )
-                                            )
-                                        );
-
-                                        Notify(
-                                            "Record updated successfully",
-                                            NotificationType.Success
-                                        )
-                                    )
-                                );
-
-                                Select(Button5_8);
-                                */
-
-                                SubmitForm(frm_EditScope_1);
-                                UpdateContext({locDisplayEditPopUpScope:false});
-                                ResetForm(frm_EditScope_1);
-                                Set(varSelectedQuestionID,Blank());
-                                Set(varNextQuestionID,Blank());
-                                Set(varLoading,false);
+                                        colNewScopeAttachments,
+                                        ForAll(DataCardValue26_3.Attachments As NewAttachment, {FileName: Text(NewAttachment.Name)})
+                                    );
+                                    SubmitForm(frm_EditScope_1)
+                                )
                               PressedBorderColor: =
                               PressedColor: =ColorValue("#004685")
                               PressedFill: =
